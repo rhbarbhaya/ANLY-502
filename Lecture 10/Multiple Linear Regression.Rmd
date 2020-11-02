@@ -1,0 +1,106 @@
+---
+title: "Multiple Linear Regression"
+author: "Rushabh Barbhaya"
+date: "October 2, 2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r PreReq, include=FALSE}
+download.file("http://www.openintro.org/stat/data/evals.RData", destfile = "evals.RData")
+load("evals.RData")
+plot(evals$score ~ evals$bty_avg)
+plot(evals$bty_avg ~ evals$bty_f1lower)
+cor(evals$bty_avg, evals$bty_f1lower)
+plot(evals[,13:19])
+m_bty_gen <- lm(score ~ bty_avg + gender, data = evals)
+summary(m_bty_gen)
+qqnorm(m_bty_gen$residuals)
+qqline(m_bty_gen$residuals)
+plot(m_bty_gen$residuals ~ evals$bty_avg)
+abline(h = 0, lty = 4)
+plot(m_bty_gen$residuals ~ evals$gender)
+abline(h = 0, lty = 4)
+plot(m_bty_gen)
+hist(m_bty_gen$residuals)
+plot(jitter(evals$score) ~ evals$bty_avg)
+plot(evals$score ~ evals$gender)
+multiLines(m_bty_gen)
+m_bty_rank <- lm(score ~ bty_avg + rank, data = evals)
+summary(m_bty_rank)
+m_full <- lm(score ~ rank + ethnicity + gender + language + age + cls_perc_eval 
+             + cls_students + cls_level + cls_profs + cls_credits + bty_avg 
+             + pic_outfit + pic_color, data = evals)
+summary(m_full)
+```
+
+# Own Your Own
+
+## Exercise 12
+
+### Check your suspicions from the previous exercise. Include the model output in your response. 
+$Answer:$ \
+The number of professors who are single, has the lease association with evaluation score. with p-value of 0.77806
+
+## Exercise 13
+### Interpret the coefficient associated with the ethnicity variable. 
+$Answer:$ \
+Ethnicity not Minority's coefficient is 0.1234929
+
+## Exercise 14
+### Drop the variable with the highest p-value and re-fit the model. Did the coefficients and significance of the other explanatory variables change? (One of the things that makes multiple regression interesting is that coefficient estimates depend on the other variables that are included in the model.) If not, what does this say about whether or not the dropped variable was collinear with the other explanatory variables?
+$Answer:$ \
+Slight increase in collinearity. \
+```{r e14}
+m_full_1 <- lm(score ~ rank + ethnicity + gender + language + age + cls_perc_eval 
+             + cls_students + cls_level + cls_credits + bty_avg 
+             + pic_outfit + pic_color, data = evals)
+summary(m_full_1)
+```
+
+## Exercise 15
+### Using backward-selection and p-value as the selection criterion, determine the best model. You do not need to show all steps in your answer, just the output for the final model. Also, write out the linear model for predicting score based on the final model you settle on.
+$Answer:$
+$$
+\hat { score } =\quad \hat { { \beta }_{ 0 } } \quad +\quad \hat { { \beta }_{ 1 } } \quad ×\quad ethnicitynot\_ minority\quad +\quad \hat { { \beta }_{ 2 } } ×gendermale\quad +\quad \hat { { \beta }_{ 3\quad } } ×\quad languagenon-english+\quad \hat { { \beta }_{ 4 } } ×\quad age\quad +\quad \hat { { \beta }_{ 5 } } ×\quad cls\_ perc\_ eval\quad +\quad \hat { { \beta }_{ 6 } } ×\quad cls\_ reditsone\_ credit\quad +\quad \hat { { \beta }_{ 7 } } ×\quad bty\_ avg\quad +\quad \hat { { \beta }_{ 8 } } ×\quad pic\_ colorcolor
+$$
+```{r e15}
+m_full_best <- lm(score ~ ethnicity + gender + language + age + cls_perc_eval 
+             +   cls_credits + bty_avg + pic_color, data = evals)
+summary(m_full_best)
+```
+
+## Exercise 16
+### Verify that the conditions for this model are reasonable using diagnostic plots.
+```{r e16}
+qqnorm(m_full_best$residuals)
+qqline(m_full_best$residuals)
+plot(m_full_best)
+hist(m_full_best$residuals) 
+plot(jitter(evals$score) ~ evals$bty_avg)
+plot(jitter(evals$score) ~ evals$gender)
+plot(jitter(evals$score) ~ evals$ethnicity)
+plot(jitter(evals$score) ~ evals$language)
+plot(jitter(evals$score) ~ evals$age)
+plot(jitter(evals$score) ~ evals$cls_perc_eval)
+plot(jitter(evals$score) ~ evals$cls_credits)
+plot(jitter(evals$score) ~ evals$pic_color)
+```
+
+## Exercise 17
+### The original paper describes how these data were gathered by taking a sample of professors from the University of Texas at Austin and including all courses that they have taught. Considering that each row represents a course, could this new information have an impact on any of the conditions of linear regression?
+$Answer:$ \
+No. Class courses are independent. Therefore, evaluation score is also independent 
+
+## Exercise 18
+### Based on your final model, describe the characteristics of a professor and course at University of Texas at Austin that would be associated with a high evaluation score.
+$Answer:$ \
+Based on the coefficients Professor would be younger male teaching one credit class, he would not belong to a minority group, he would have received this degree from a universtity where english is the language. The professor would have a black and white picture and who have been rated beautiful.
+
+## Exercise 19
+### Would you be comfortable generalizing your conclusions to apply to professors generally (at any university)? Why or why not?
+$Answer:$ \
+No. The conditions always differs from and across time. Also, this was a sample set not real values.
