@@ -1,0 +1,123 @@
+---
+title: "Lecture 8 Inference for Categorical Data"
+author: "Rushabh Barbhaya"
+date: "September 19, 2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Own Your Own
+
+### Question:
+The question of atheism was asked by WIN-Gallup International in a similar survey that was conducted in 2005. (We assume here that sample sizes have remained the same.) Table 4 on page 13 of the report summarizes survey results from 2005 and 2012 for 39 countries.
+
+1. Answer the following two questions using the inference function. As always, write out the hypotheses for any tests you conduct and outline the status of the conditions for inference.
+
+    a. Is there convincing evidence that Spain has seen a change in its atheism index between 2005 and 2012? \
+    *Hint: Create a new data set for respondents from Spain. Form confidence intervals for the true proportion of athiests in both years, and determine whether they overlap.* \
+    b. Is there convincing evidence that the United States has seen a change in its atheism index between 2005 and 2012? \
+
+```{r preRec, results='hide', include=FALSE}
+download.file("http://www.openintro.org/stat/data/atheism.RData", destfile = "atheism.RData")
+load("atheism.RData")
+us12 <- subset(atheism, nationality == "United States" & year == 2012)
+inference(us12$response, est = "proportion", type = "ci", method = "theoretical", 
+          success = "atheist")
+n <- 1000
+p <- seq(0, 1, 0.01)
+me <- 2 * sqrt(p * (1 - p)/n)
+plot(me ~ p, ylab = "Margin of Error", xlab = "Population Proportion")
+p <- 0.1
+n <- 1040
+p_hats <- rep(0, 5000)
+
+for(i in 1:5000){
+  samp <- sample(c("atheist", "non_atheist"), n, replace = TRUE, prob = c(p, 1-p))
+  p_hats[i] <- sum(samp == "atheist")/n
+}
+```
+
+```{r question1a, warning=FALSE}
+spain05 <- subset(atheism, nationality == "Spain" & year == "2005")
+spain05$nationality <- as.factor(as.character(spain05$nationality))
+table(spain05$nationality, spain05$response)
+
+spain12 <- subset(atheism, nationality == "Spain" & year == "2012")
+spain12$nationality <- as.factor(as.character(spain12$nationality))
+table(spain12$nationality, spain12$response)
+
+inference(spain05$response, est = "proportion", type = "ci", method = "theoretical", 
+          success = "atheist")
+
+inference(spain12$response, est = "proportion", type = "ci", method = "theoretical", 
+          success = "atheist")
+```
+
+The assumptions:
+
+$H_0:$ The **number** of atheists in Spain did not change from 2005 to 2012 ($p_{12}=p_6 = 0.1$)
+$H_A:$ The **number** changed ($p_{12} \ne 0.1$)\
+\
+$Solution:$  \
+$p_{12} = 0.09$  which is less than 0.1; Therefore, we fail to reject the null hypothesis
+\
+\
+Now, sub-question b.
+The assumptions:
+
+$H_0:$ The **number** of atheists in America did not change from 2005 to 2012 ($p_{12}=p_6 = 0.1$)
+$H_A:$ The **number** changed ($p_{12} \ne 0.1$)\
+
+```{r question1b, warning=FALSE}
+us05 <- subset(atheism, nationality == "United States" & year == "2005")
+us05$nationality <- as.factor(as.character(us05$nationality))
+table(us05$nationality, us05$response)
+
+us12$nationality <- as.factor(as.character(us12$nationality))
+table(us12$nationality, us12$response)
+
+inference(us05$response, est = "proportion", type = "ci", method = "theoretical", 
+          success = "atheist")
+inference(us12$response, est = "proportion", type = "ci", method = "theoretical", 
+          success = "atheist")
+```
+\
+$Solution:$  \
+$p_{12} = 0.0499$  which is less than 0.1; Therefore, we fail to reject the null hypothesis
+\
+
+### Question: \
+2. If in fact there has been no change in the atheism index in the countries listed in Table 4, in how many of those countries would you expect to detect a change (at a significance level of 0.05) simply by chance? \
+*Hint: Look in the textbook index under Type 1 error.*
+
+$Solution:$ \
+Type 1 error says that we rejected a null hypothesis even if the that should not be the case. This can happen purely on chance as well. \
+At a significance level of 0.05 with 39 countries we would make a Type 1 error on $39 \times 0.05 = 1.95 \approx 2$ countries. \
+
+### Question:
+3. Suppose you're hired by the local government to estimate the proportion of residents that attend a religious service on a weekly basis. According to the guidelines, the estimate must have a margin of error no greater than 1% with 95% confidence. You have no idea what to expect for **\(p\)**. How many people would you have to sample to ensure that you are within the guidelines? \
+*Hint: Refer to your plot of the relationship between **\(p\)** and margin of error. Do not use the data set to answer this question.* \
+\
+$Solution:$ \
+If the margin of error is $0.01,$ then at 95% the standard error would be \
+$$
+SE = \frac{0.01}{1.96} \approx 0.0051
+$$
+    Assuming, $p = 0.5$, we get
+    $$
+    SE = \sqrt{\frac{p(1-p)}{n}}
+    $$
+    $$
+    n = \frac{p(1-p)}{SE^2}
+    $$
+    $$
+    n = \frac{0.5\times0.5}{0.01\div1.96}
+    $$
+    $$
+    n = 9604
+    $$
+    
+    We need at the least 9604 samples.
