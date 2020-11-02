@@ -1,0 +1,102 @@
+---
+title: "Linear Regression"
+author: "Rushabh Barbhaya"
+date: "September 25, 2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r dataset, include = FALSE}
+download.file("http://www.openintro.org/stat/data/mlb11.RData", destfile = "mlb11.RData")
+load("mlb11.RData")
+plot(mlb11$at_bats, mlb11$runs)
+m1 = (lm( mlb11$runs ~ mlb11$at_bats))
+summary(m1)
+abline(lm( mlb11$runs ~ mlb11$at_bats))
+cor(mlb11$runs, mlb11$at_bats)
+# plot_ss(x = mlb11$at_bats, y = mlb11$runs)
+# plot_ss(x = mlb11$at_bats, y = mlb11$runs, showSquares = TRUE)
+m2 <- lm( runs ~ at_bats,data = mlb11)
+summary(m2)
+# lmHR = lm(mlb11$runs ~ mlb11$atbats)
+# summary(lmHR)
+# plot(mlb11$runs ~ mlb11$homeruns)
+# abline((lmHR))
+# plot(mlb11$runs ~ mlb11$at_bats)
+# abline(m1)
+# summary(lmHR)
+plot(mlb11$runs ~ mlb11$at_bats)
+abline(m1)
+mlb11$runs[mlb11$at_bats==5710]
+plot(m1$residuals ~ mlb11$at_bats)
+abline(h = 0, lty = 3)
+hist(m1$residuals)
+qqnorm(m1$residuals)
+qqline(m1$residuals) 
+```
+
+# On Your Own Section
+
+##  1.  Choose another traditional variable from mlb11 that you think might be a good predictor of *runs*. Produce a scatterplot of the two variables and fit a linear model. At a glance, does there seem to be a linear relationship? \
+
+$Solution:$ \
+The relationship is not linear
+
+```{r Question1}
+plot(mlb11$stolen_bases, mlb11$runs, xlab = "Stolen Bases", ylab = "Runs", col = "blue")
+```
+
+##  2.  How does this relationship compare to the relationship between *runs* and *at_bats*? Use the $R^2$ values from the two model summaries to compare. Does your variable seem to predict *runs* better than *at_bats*? How can you tell?
+
+$Solution:$ \
+The $R^2$ value for bats is 37%. So with bats we can estimate about 37% of runs. With Stolen bases the $R^2$ value is 0.3%. So bats are clearly a better predicting variable as compared to stolen bases.
+
+```{r Question2}
+m3 = lm(mlb11$runs ~ mlb11$stolen_bases)
+summary(m1)
+summary(m3)
+```
+
+##  3.  Now that you can summarize the linear relationship between two variables, investigate the relationships between *runs* and each of the other five traditional variables. Which variable best predicts *runs*? Support your conclusion using the graphical and numerical methods we've discussed (for the sake of conciseness, only include output for the best variable, not all five). \
+
+$Solution:$ \
+
+```{r Question3}
+m4 = lm(mlb11$runs ~ mlb11$bat_avg)
+summary(m4)
+plot(mlb11$bat_avg, mlb11$runs, xlab = "Batting Average", ylab = "Runs", col = "blue")
+abline(m4, col = "red")
+hist(resid(m4))
+plot(mlb11$bat_avg, resid(m4))
+abline(h = 0, lty = 3)
+qqnorm(resid(m4))
+qqline(resid(m4))
+```
+
+##  4.  Now examine the three newer variables. These are the statistics used by the author of Moneyball to predict a teams success. In general, are they more or less effective at predicting runs that the old variables? Explain using appropriate graphical and numerical evidence. Of all ten variables we've analyzed, which seems to be the best predictor of *runs*? Using the limited (or not so limited) information you know about these baseball statistics, does your result make sense? \
+
+$Solution:$ \
+Yes, it's better \
+
+```{r Question4}
+m5 <- lm(mlb11$runs ~  mlb11$new_obs)
+summary(m5)
+plot(mlb11$new_obs, mlb11$runs, xlab = 'On Base + Slugging', ylab= 'Runs', col = 'blue')
+abline(m5, col = 'red')
+```
+
+##  5.  Check the model diagnostics for the regression model with the variable you decided was the best predictor for runs.
+
+$Solution:$ \
+This is the best predictor I have ever seen. 93%, that's amazing. \
+
+```{r Question5}
+hist(resid(m5))
+plot(mlb11$new_obs, resid(m5))
+abline(h = 0, lty = 3)
+qqnorm(resid(m5))
+qqline(resid(m5))
+```
